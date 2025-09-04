@@ -56,7 +56,7 @@
             }));
 
             // Files
-            results.AddRange(Directory.GetFiles(targetPath).Select(file =>
+            results.AddRange(Directory.GetFiles(targetPath).Where(f => Path.GetFileName(f) != ".gitkeep").Select(file =>
             {
                 var info = new FileInfo(file);
                 return new FileModel
