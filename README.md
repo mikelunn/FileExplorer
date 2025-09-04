@@ -41,5 +41,9 @@ Access http://localhost:5013
 <img width="1006" height="501" alt="image" src="https://github.com/user-attachments/assets/e43b049b-54be-4d4b-b93b-828a0af4be79" />
 <img width="784" height="363" alt="image" src="https://github.com/user-attachments/assets/f4119218-bb64-418f-8995-1a6f7c13c2c8" />
 
+### Deep Linking
+- File/directory location stored in url
+<img width="1294" height="579" alt="image" src="https://github.com/user-attachments/assets/f4da902f-6315-4b79-9c61-3d9f4871d3e1" />
+
 
 
