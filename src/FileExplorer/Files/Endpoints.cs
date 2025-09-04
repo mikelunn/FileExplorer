@@ -153,7 +153,7 @@ namespace FileExplorer.Files
                 }
 
             });
-            app.MapGet($"{_routePrefix}/search", (string? path, string query) =>
+            app.MapGet($"{_routePrefix}/search", (string query) =>
             {
                 var files = fileService.SearchFiles(query);
                 return Results.Ok(files);
