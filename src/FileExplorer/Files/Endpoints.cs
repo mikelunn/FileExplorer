@@ -14,7 +14,7 @@ namespace FileExplorer.Files
         public void MapEndpoints(WebApplication app)
         {
 
-            app.MapGet($"{_routePrefix}", (string? path) =>
+            app.MapGet(_routePrefix, (string? path) =>
             {
                 try
                 {
@@ -79,7 +79,7 @@ namespace FileExplorer.Files
             });
 
 
-            app.MapPost($"{_routePrefix}", async (HttpRequest request) =>
+            app.MapPost(_routePrefix, async (HttpRequest request) =>
             {
                 
                 if (!request.HasFormContentType)
@@ -96,7 +96,7 @@ namespace FileExplorer.Files
                 await fileService.SaveFile(normalizedPath, file.OpenReadStream());
                 return Results.Created();
             });
-            app.MapPut($"{_routePrefix}", (string source, string destination, string operation) =>
+            app.MapPut(_routePrefix, (string source, string destination, string operation) =>
             {
                 try
                 {
@@ -130,7 +130,7 @@ namespace FileExplorer.Files
                 }
 
             });
-            app.MapDelete($"{_routePrefix}", (string? path) =>
+            app.MapDelete(_routePrefix, (string? path) =>
             {
                 try
                 {
@@ -155,7 +155,6 @@ namespace FileExplorer.Files
             });
             app.MapGet($"{_routePrefix}/search", (string? path, string query) =>
             {
-                //var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
                 var files = fileService.SearchFiles(query);
                 return Results.Ok(files);
             });
