@@ -23,6 +23,7 @@ class ExplorerApp {
         const { path } = this.getParams();
         const files = await this.loadFiles(path);
         this.fileList.setFiles(files);
+        //filter truthy elements in array
         this.breadcrumb.setPath(path ? path.split('/').filter(Boolean) : []);
     }
 
@@ -54,6 +55,7 @@ class ExplorerApp {
         const pathSegments = path.split('/');
         const filename = pathSegments[pathSegments.length - 1];
 
+        //remove any trailing slashes from destination
         const destinationPath = destination
             ? `${destination.replace(/\/$/, '')}/${filename}`
             : filename;
