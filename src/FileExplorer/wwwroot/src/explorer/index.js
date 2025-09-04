@@ -3,6 +3,7 @@ import Breadcrumb from '../common/breadcrumb.js';
 import UrlService from '../common/urlService.js';
 import FileUpload from '../common/fileUpload.js';
 import HttpService from '../common/httpService.js';
+import FileSearch from '../common/fileSearch.js';
 
 class ExplorerApp {
     constructor() {
@@ -13,11 +14,11 @@ class ExplorerApp {
             onNavigate: ({ path }) => this.urlService.setParams({ path })
         });
         this.fileUpload = new FileUpload('upload-container', { onUpload: this.handleUpload.bind(this) });
+        this.fileSearch = new FileSearch('search-container', { onInput: this.searchFiles.bind(this) });
 
         this.init();
     }
 
-    // Main entry point to refresh files and breadcrumb
     async init() {
         const { path } = this.getParams();
         const files = await this.loadFiles(path);
@@ -30,7 +31,6 @@ class ExplorerApp {
         return { path: params.path || '' };
     }
 
-    // Handle file click events
     async handleFileEvent(file, action) {
         if (action === 'delete') {
             await this.deleteFile(file);
@@ -69,7 +69,8 @@ class ExplorerApp {
             await this.init();
         } catch (err) {
             console.error(err);
-            alert(`${action} failed.`);
+            const msg = err?.message || 'Unknown error';
+            alert(`${action} failed: ${msg}`);
         }
     }
     async deleteFile({ path }) {
@@ -96,7 +97,8 @@ class ExplorerApp {
             URL.revokeObjectURL(url);
         } catch (err) {
             console.error('Download failed:', err);
-            alert('Failed to download file.');
+            const msg = err?.message || 'Unknown error';
+            alert(`Download failed: ${msg}`);
         }
     }
 
@@ -121,6 +123,23 @@ class ExplorerApp {
     async loadFiles(path) {
         const queryParams = path ? { path } : {};
         return await this.httpService.request('', { queryParams });
+    }
+    async searchFiles(query) {
+        if (!query) {
+            this.init();
+            return;
+        }
+
+        try {
+            const results = await this.httpService.request('search', {
+                queryParams: { query }
+            });
+            this.fileList.setFiles(results);
+        } catch (err) {
+            console.error(err);
+            const msg = err?.message || 'Unknown error';
+            alert(`Search failed: ${msg}`);
+        }
     }
 }
 
