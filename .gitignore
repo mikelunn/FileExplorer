@@ -428,4 +428,8 @@ FodyWeavers.xsd
 *.msp
 
 
-App_Data
+# Ignore everything in App_Data/Default
+App_Data/Default/*
+
+# But keep the placeholder file
+!App_Data/Default/.gitkeep
