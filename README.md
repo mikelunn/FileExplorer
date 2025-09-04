@@ -21,7 +21,6 @@ git clone https://github.com/mikelunn/FileExplorer.git
 
 # Navigate into the project
 cd FileExplorer/src/FileExplorer
-mkdir App_Data/Default
 
 # Run
 dotnet run
