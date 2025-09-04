@@ -1,25 +1,27 @@
-import FileList from './FileList.js';
+import FileList from './fileList.js';
 import Breadcrumb from '../common/breadcrumb.js';
 import UrlService from '../common/urlService.js';
 import FileUpload from '../common/fileUpload.js';
 import HttpService from '../common/httpService.js';
-import FileSearch from '../common/fileSearch.js';
 
 class ExplorerApp {
     constructor() {
         this.httpService = new HttpService('/api/v1/files');
-        this.urlService = new UrlService({ onChange: this.onPathChange.bind(this) });
+        this.urlService = new UrlService({ onChange: this.init.bind(this) });
         this.fileList = new FileList('file-list', { onClick: this.handleFileEvent.bind(this) });
-        this.breadcrumb = new Breadcrumb('breadcrumb', { onNavigate: ({ home, path }) => this.urlService.setParams({ home, path }) });
+        this.breadcrumb = new Breadcrumb('breadcrumb', {
+            onNavigate: ({ path }) => this.urlService.setParams({ path })
+        });
         this.fileUpload = new FileUpload('upload-container', { onUpload: this.handleUpload.bind(this) });
-        this.fileSearch = new FileSearch('search-container', { onInput: this.searchFiles.bind(this) });
 
         this.init();
     }
 
+    // Main entry point to refresh files and breadcrumb
     async init() {
         const { path } = this.getParams();
-        await this.loadFiles(path);
+        const files = await this.loadFiles(path);
+        this.fileList.setFiles(files);
         this.breadcrumb.setPath(path ? path.split('/').filter(Boolean) : []);
     }
 
@@ -27,30 +29,8 @@ class ExplorerApp {
         const params = this.urlService.getParams();
         return { path: params.path || '' };
     }
-    async updateFile({path }, action) {
-        const destination = prompt(`Enter destination folder path for file:`);
-        if (!destination) return;
-        const pathSegments = path.split('/');
-        const filename = pathSegments[pathSegments.length - 1];
 
-        const destinationPath = destination
-            ? `${destination.replace(/\/$/, '')}/${filename}`
-            : filename;
-        try {
-            await this.httpService.request('', {
-                method: "PUT",
-                queryParams: {
-                    source: path,
-                    destination: destinationPath,
-                    operation: action
-                }
-            });
-            await this.loadFiles(this.getParams()?.path);
-        } catch (err) {
-            console.error(err);
-            alert(`${action} failed.`);
-        }
-    }
+    // Handle file click events
     async handleFileEvent(file, action) {
         if (action === 'delete') {
             await this.deleteFile(file);
@@ -68,19 +48,44 @@ class ExplorerApp {
             await this.navigate(file);
         }
     }
+    async updateFile({ path }, action) {
+        const destination = prompt(`Enter destination folder path for file:`);
+        if (!destination) return;
+        const pathSegments = path.split('/');
+        const filename = pathSegments[pathSegments.length - 1];
+
+        const destinationPath = destination
+            ? `${destination.replace(/\/$/, '')}/${filename}`
+            : filename;
+        try {
+            await this.httpService.request('', {
+                method: "PUT",
+                queryParams: {
+                    source: path,
+                    destination: destinationPath,
+                    operation: action
+                }
+            });
+            await this.init();
+        } catch (err) {
+            console.error(err);
+            alert(`${action} failed.`);
+        }
+    }
+    async deleteFile({ path }) {
+        if (!path) return;
+        await this.httpService.request('', { method: 'DELETE', queryParams: { path } });
+        await this.init();
+    }
+
     async downloadFile({ path }) {
         try {
-            const params = { path };
-            // Make async request using your HttpService
             const blob = await this.httpService.request('download', {
-                queryParams: params,
+                queryParams: { path },
                 responseType: 'blob'
             });
 
-            // Derive filename from path
             const filename = path.split('/').pop();
-
-            // Create a temporary link to trigger download
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -94,12 +99,6 @@ class ExplorerApp {
             alert('Failed to download file.');
         }
     }
-    async deleteFile({ path }) {
-        await this.httpService.request('', { method: 'DELETE', queryParams: { ...(path ? { path } : {}) } });
-        const { path: currentPath } = this.getParams();
-        await this.loadFiles(currentPath);
-        this.breadcrumb.setPath(currentPath ? currentPath.split('/').filter(Boolean) : []);
-    }
 
     async handleUpload(file) {
         const { path } = this.getParams();
@@ -109,50 +108,19 @@ class ExplorerApp {
         formData.append('file', file, file.name);
         formData.append('path', filePath);
 
-        await this.httpService.request('', { method: "POST", body: formData });
-
-        await this.loadFiles(path);
-        this.breadcrumb.setPath(path ? path.split('/').filter(Boolean) : []);
+        await this.httpService.request('', { method: 'POST', body: formData });
+        await this.init();
     }
 
-    async navigate(event) {
-        if (event.isDirectory) {
-            const path = event.path || '';
-            this.breadcrumb.add(event.name);
-            this.urlService.setParams({ path });
+    async navigate(file) {
+        if (file.isDirectory) {
+            this.urlService.setParams({ path: file.path });
         }
     }
-
-    async onPathChange({ path }) {
-        await this.loadFiles(path || '');
-    }
-
 
     async loadFiles(path) {
-        const queryParams = { ...(path ? { path } : {}) };
-        const files = await this.httpService.request('', { queryParams });
-        this.fileList.setFiles(files);
-
-        if (!this.breadcrumb.currentPath.length && path) {
-            this.breadcrumb.setPath(path.split('/').filter(Boolean));
-        }
-    }
-    async searchFiles(query) {
-        if (!query) {
-            const { path } = this.getParams();
-            await this.loadFiles(path);
-            return;
-        }
-
-        try {
-            const results = await this.httpService.request('search', {
-                queryParams: { query }
-            });
-            this.fileList.setFiles(results);
-        } catch (err) {
-            console.error(err);
-            alert('Search failed.');
-        }
+        const queryParams = path ? { path } : {};
+        return await this.httpService.request('', { queryParams });
     }
 }
 
