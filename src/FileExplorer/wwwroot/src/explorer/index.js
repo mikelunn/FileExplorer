@@ -45,7 +45,6 @@ class ExplorerApp {
                     operation: action
                 }
             });
-            alert(`File updated successfully.`);
             await this.loadFiles(this.getParams()?.path);
         } catch (err) {
             console.error(err);
