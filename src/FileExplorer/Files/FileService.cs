@@ -46,7 +46,6 @@
                     Name = Path.GetFileName(dir),
                     Path = Path.GetRelativePath(homeFolder, dir).Replace("\\", "/"),
                     IsDirectory = true,
-                    Home = homeFolder,
                     Size = folderSize,
                     FileCount = fileCount,
                     FolderCount = folderCount
@@ -62,7 +61,6 @@
                     Name = info.Name,
                     Path = Path.GetRelativePath(homeFolder, file).Replace("\\", "/"),
                     IsDirectory = false,
-                    Home = homeFolder,
                     Size = info.Length
                 };
             }));
@@ -167,7 +165,7 @@
 
             if (!sourceInfo.Exists) throw new DirectoryNotFoundException(sourceDir);
 
-            // Prevent circular copy
+            // Preventing circular copy
             var fullSource = Path.GetFullPath(sourceDir).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
             var fullDest = Path.GetFullPath(destinationDir).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
 
@@ -215,8 +213,7 @@
                     {
                         Name = Path.GetFileName(dir),
                         Path = Path.GetRelativePath(homeFolder, dir).Replace("\\", "/"),
-                        IsDirectory = true,
-                        Home = homeFolder
+                        IsDirectory = true
                     });
                 }
             }
@@ -232,7 +229,6 @@
                         Name = info.Name,
                         Path = Path.GetRelativePath(homeFolder, file).Replace("\\", "/"),
                         IsDirectory = false,
-                        Home = homeFolder,
                         Size = info.Length
                     });
                 }
