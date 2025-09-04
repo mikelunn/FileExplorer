@@ -35,7 +35,6 @@ namespace FileExplorer.Files
             });
             app.MapGet($"{_routePrefix}/download", async (HttpRequest request, HttpResponse response) =>
             {
-                //var home = request.Query["home"].FirstOrDefault() ?? "default";
                 var path = request.Query["path"].FirstOrDefault();
                 if (string.IsNullOrEmpty(path))
                     return Results.BadRequest("File path is required.");
@@ -49,7 +48,6 @@ namespace FileExplorer.Files
                     var filename = Path.GetFileName(path);
                     var ext = Path.GetExtension(path).ToLowerInvariant();
 
-                    // Minimal content type mapping
                     var contentType = ext switch
                     {
                         ".png" => "image/png",
@@ -92,9 +90,7 @@ namespace FileExplorer.Files
                 if (file == null || file.Length == 0)
                     return Results.BadRequest("No file uploaded");
 
-                //var home = form["home"].FirstOrDefault() ?? "default";
                 var path = form["path"].FirstOrDefault() ?? file.FileName;
-                //var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
                 var normalizedPath = path?.TrimStart('/') ?? "";
 
                 await fileService.SaveFile(normalizedPath, file.OpenReadStream());
@@ -104,7 +100,6 @@ namespace FileExplorer.Files
             {
                 try
                 {
-                    //var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
                     if (operation == "copy")
                     {
                         fileService.CopyFile(source, destination);
@@ -139,7 +134,6 @@ namespace FileExplorer.Files
             {
                 try
                 {
-                    //var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
                     var normalizedPath = path?.TrimStart('/') ?? "";
                     fileService.DeleteFile(normalizedPath);
                     return Results.NoContent();
