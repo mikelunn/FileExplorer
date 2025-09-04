@@ -39,7 +39,7 @@
     }
 
     _bindEvents() {
-        this.container.addEventListener("click", async (e) => {
+        this.container.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -51,14 +51,8 @@
             const action = e.target.dataset?.action;
 
             if (this.onClick) {
-                try {
-                    await this.onClick(item, action);
-                } catch (err) {
-                    console.error("FileList onClick error:", err);
-                }
+                this.onClick(item, action);
             }
-
-            return false;
         });
     }
 }

@@ -6,36 +6,22 @@ class UrlService {
     }
 
     getParams() {
-        const params = new URLSearchParams(window.location.search);
-        return Object.fromEntries(params.entries());
+        return Object.fromEntries(new URLSearchParams(window.location.search).entries());
     }
 
-    setParams(updates, { replace = false } = {}) {
+    setParams(updates = {}, { replace = false } = {}) {
         const params = new URLSearchParams(window.location.search);
 
-        // Apply updates
         Object.entries(updates).forEach(([key, value]) => {
-            if (value != null && value !== "") {
-                params.set(key, value);
-            } else {
-                params.delete(key);
-            }
+            if (value != null && value !== "") params.set(key, value);
+            else params.delete(key);
         });
 
-        // Build new URL safely (avoid "/?")
         const query = params.toString();
-        const newUrl = query
-            ? `${window.location.pathname}?${query}`
-            : window.location.pathname;
+        const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
 
-        // Push or replace state
-        if (replace) {
-            history.replaceState({}, "", newUrl);
-        } else {
-            history.pushState({}, "", newUrl);
-        }
+        replace ? history.replaceState({}, "", newUrl) : history.pushState({}, "", newUrl);
 
-        // Trigger callback
         this.onChange?.(this.getParams());
     }
 

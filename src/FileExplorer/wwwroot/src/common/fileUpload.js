@@ -17,17 +17,13 @@
     }
 
     _bindEvents() {
-        this.fileInput.addEventListener("change", async () => {
+        this.fileInput.addEventListener("change", () => {
             const file = this.fileInput.files[0];
             if (!file) return;
 
             if (typeof this.onUpload === "function") {
-                try {
-                    await this.onUpload(file);
-                    this.fileInput.value = "";
-                } catch (err) {
-                    console.error("FileUpload onUpload error:", err);
-                }
+                this.onUpload(file);
+                this.fileInput.value = "";
             }
         });
     }
