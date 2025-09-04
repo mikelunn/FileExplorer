@@ -4,6 +4,7 @@
     margin: 0;
     padding: 2rem;
 }
+
 #loader {
     display: none;
     position: fixed;
@@ -19,6 +20,7 @@
     font-size: 2rem;
     color: white;
 }
+
 .explorer {
     background: #fff;
     border-radius: 8px;
@@ -33,10 +35,11 @@
     justify-content: space-between;
     align-items: center;
 }
+
 #controls-container {
     display: flex;
-    align-items: center; /* vertically align items */
-    gap: 1rem; /* spacing between upload and search */
+    align-items: center;
+    gap: 1rem;
     margin-bottom: 1rem;
 }
 
@@ -92,23 +95,23 @@
 #file-list li {
     display: flex;
     align-items: center;
-    gap: 0.4rem; /* space between icon and name */
+    gap: 0.4rem;
     padding: 4px 8px;
     cursor: pointer;
 }
 
     #file-list li.folder::before {
-        content: "📁"; /* folder emoji */
+        content: "📁";
         font-size: 1.1rem;
     }
 
     #file-list li.file::before {
-        content: "📄"; /* file emoji */
+        content: "📄";
         font-size: 1.1rem;
     }
 
 .file-name {
-    flex: 1; /* name expands to take remaining space */
+    flex: 1;
 }
 
 
