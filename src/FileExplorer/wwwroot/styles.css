@@ -1,0 +1,119 @@
+﻿body {
+    font-family: system-ui, sans-serif;
+    background: #f7f7f9;
+    margin: 0;
+    padding: 2rem;
+}
+#loader {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: white;
+}
+.explorer {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 1rem 1.5rem;
+    max-width: 600px;
+    margin: auto;
+}
+
+.explorer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#controls-container {
+    display: flex;
+    align-items: center; /* vertically align items */
+    gap: 1rem; /* spacing between upload and search */
+    margin-bottom: 1rem;
+}
+
+#search-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    #search-container input {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    #search-container button {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+
+.breadcrumb span {
+    cursor: pointer;
+    color: #007bff;
+}
+
+    .breadcrumb span:not(:last-child)::after {
+        content: " / ";
+        color: #aaa;
+    }
+
+.explorer-actions {
+    margin: 1rem 0;
+}
+
+.upload-label {
+    cursor: pointer;
+}
+
+.upload-btn {
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+    .upload-btn:hover {
+        background: #0056b3;
+    }
+
+#file-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem; /* space between icon and name */
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+    #file-list li.folder::before {
+        content: "📁"; /* folder emoji */
+        font-size: 1.1rem;
+    }
+
+    #file-list li.file::before {
+        content: "📄"; /* file emoji */
+        font-size: 1.1rem;
+    }
+
+.file-name {
+    flex: 1; /* name expands to take remaining space */
+}
+
+
+.delete-btn {
+    color: #e00;
+    font-size: 1rem;
+    cursor: pointer;
+}

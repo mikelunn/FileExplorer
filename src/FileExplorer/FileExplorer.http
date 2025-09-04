@@ -1,0 +1,20 @@
+@FileExplorer_HostAddress = http://localhost:5013
+
+GET {{FileExplorer_HostAddress}}/api/v1/files
+Accept: application/json
+
+###
+
+### Upload a file (raw stream)
+POST {{FileExplorer_HostAddress}}/api/v1/files?path=/one/two/hello.txt
+Content-Type: application/octet-stream
+
+###< ./hello.txt
+
+
+###
+DELETE {{FileExplorer_HostAddress}}/api/v1/files?path=two
+Content-Type: application/json
+
+###
+PUT {{FileExplorer_HostAddress}}/api/v1/files?source=class.txt&destination=one/copy-class.txt&operation=copy

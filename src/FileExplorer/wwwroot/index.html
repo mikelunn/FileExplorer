@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Explorer Project</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div id="loader">⏳ Loading...</div>
+    <main class="explorer">
+        <header class="explorer-header">
+            <h2>📁 File Explorer</h2>
+            <nav id="breadcrumb" class="breadcrumb">
+                <span data-index="0">default</span>
+            </nav>
+        </header>
+        <div id="controls-container">
+            <section id="upload-container" class="explorer-actions"></section>
+
+            <div id="search-container"></div>
+        </div>
+        <section class="explorer-list">
+            <ul id="file-list" class="file-list">
+            </ul>
+        </section>
+    </main>
+    <script type="module" src="/src/app.js"></script>
+
+</body>
+</html>
