@@ -2,14 +2,12 @@ class Breadcrumb {
     constructor(containerId, { onNavigate } = {}) {
         this.container = document.getElementById(containerId);
         this.currentPath = [];
-        this.currentHome = "default";
         this.onNavigate = onNavigate;
         this._bindEvents();
     }
 
-    setPath(home, pathArray = []) {
-        this.currentHome = home;
-        this.currentPath = [home, ...pathArray];
+    setPath(pathArray = []) {
+        this.currentPath = ['Home', ...pathArray];
         this.render();
     }
 
@@ -37,8 +35,9 @@ class Breadcrumb {
             this.render();
 
             this.onNavigate?.({
-                home: this.currentPath[0],
-                path: this.currentPath.length > 1 ? this.currentPath.slice(1).join('/') : undefined
+                path: index === 0
+                    ? '' // "Home" = empty path
+                    : this.currentPath.slice(1).join('/')
             });
         });
     }

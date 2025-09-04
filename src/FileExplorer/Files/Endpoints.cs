@@ -14,13 +14,12 @@ namespace FileExplorer.Files
         public void MapEndpoints(WebApplication app)
         {
 
-            app.MapGet($"{_routePrefix}", (string? home, string? path) =>
+            app.MapGet($"{_routePrefix}", (string? path) =>
             {
                 try
                 {
-                    var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
                     var normalizedPath = path?.TrimStart('/') ?? "";
-                    var files = fileService.GetFiles(selectedHome, normalizedPath);
+                    var files = fileService.GetFiles(normalizedPath);
                     return Results.Ok(files);
 
                 }
@@ -36,14 +35,14 @@ namespace FileExplorer.Files
             });
             app.MapGet($"{_routePrefix}/download", async (HttpRequest request, HttpResponse response) =>
             {
-                var home = request.Query["home"].FirstOrDefault() ?? "default";
+                //var home = request.Query["home"].FirstOrDefault() ?? "default";
                 var path = request.Query["path"].FirstOrDefault();
                 if (string.IsNullOrEmpty(path))
                     return Results.BadRequest("File path is required.");
 
                 try
                 {
-                    var stream = fileService.GetFileStream(home, path);
+                    var stream = fileService.GetFileStream(path);
                     if (stream == null)
                         return Results.NotFound();
 
@@ -93,27 +92,27 @@ namespace FileExplorer.Files
                 if (file == null || file.Length == 0)
                     return Results.BadRequest("No file uploaded");
 
-                var home = form["home"].FirstOrDefault() ?? "default";
+                //var home = form["home"].FirstOrDefault() ?? "default";
                 var path = form["path"].FirstOrDefault() ?? file.FileName;
-                var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
+                //var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
                 var normalizedPath = path?.TrimStart('/') ?? "";
 
-                await fileService.SaveFile(selectedHome, normalizedPath, file.OpenReadStream());
+                await fileService.SaveFile(normalizedPath, file.OpenReadStream());
                 return Results.Created();
             });
-            app.MapPut($"{_routePrefix}", (string? home, string source, string destination, string operation) =>
+            app.MapPut($"{_routePrefix}", (string source, string destination, string operation) =>
             {
                 try
                 {
-                    var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
+                    //var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
                     if (operation == "copy")
                     {
-                        fileService.CopyFile(selectedHome, source, destination);
+                        fileService.CopyFile(source, destination);
                         return Results.Ok(new { message = "File copied successfully." });
                     }
                     else if (operation == "move")
                     {
-                        fileService.MoveFile(selectedHome, source, destination);
+                        fileService.MoveFile(source, destination);
                         return Results.Ok(new { message = "File moved successfully." });
                     }
                     else
@@ -136,13 +135,13 @@ namespace FileExplorer.Files
                 }
 
             });
-            app.MapDelete($"{_routePrefix}", (string? home, string? path) =>
+            app.MapDelete($"{_routePrefix}", (string? path) =>
             {
                 try
                 {
-                    var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
+                    //var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
                     var normalizedPath = path?.TrimStart('/') ?? "";
-                    fileService.DeleteFile(selectedHome, normalizedPath);
+                    fileService.DeleteFile(normalizedPath);
                     return Results.NoContent();
                 }
                 catch(FileNotFoundException ex)
@@ -160,10 +159,10 @@ namespace FileExplorer.Files
                 }
 
             });
-            app.MapGet($"{_routePrefix}/search", (string? home, string? path, string query) =>
+            app.MapGet($"{_routePrefix}/search", (string? path, string query) =>
             {
-                var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
-                var files = fileService.SearchFiles(selectedHome, query);
+                //var selectedHome = string.IsNullOrEmpty(home) ? "default" : home;
+                var files = fileService.SearchFiles(query);
                 return Results.Ok(files);
             });
 

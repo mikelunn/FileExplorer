@@ -2,33 +2,31 @@
 {
     public interface IFileService
     {
-        IEnumerable<FileModel> GetFiles(string home, string relativePath);
-        Stream GetFileStream(string home, string relativePath);
-        Task SaveFile(string home, string relativePath, Stream fileStream);
-        void DeleteFile(string home, string relativePath);
-        void CopyFile(string home, string sourcePath, string destinationPath);
-        void MoveFile(string home, string sourcePath, string destinationPath);
-        IEnumerable<FileModel> SearchFiles(string home, string query);
+        IEnumerable<FileModel> GetFiles( string relativePath);
+        Stream GetFileStream(string relativePath);
+        Task SaveFile( string relativePath, Stream fileStream);
+        void DeleteFile( string relativePath);
+        void CopyFile(string sourcePath, string destinationPath);
+        void MoveFile( string sourcePath, string destinationPath);
+        IEnumerable<FileModel> SearchFiles(string query);
     }
-    public class FileService(IWebHostEnvironment webHostEnvironment) : IFileService
+    public class FileService : IFileService
     {
-        private readonly IWebHostEnvironment webHostEnvironment = webHostEnvironment;
+        private readonly string _homeDir;
 
-        private string GetHomeFolderPath(string home)
+        public FileService(IWebHostEnvironment webHostEnvironment)
         {
-            // Sanitize the home input to prevent directory traversal attacks
-            var sanitizedHome = string.Join("_", home.Split(Path.GetInvalidFileNameChars()));
-            var homePath = Path.Combine(webHostEnvironment.ContentRootPath, "App_Data", sanitizedHome);
-            // Ensure the directory exists
-            if (!Directory.Exists(homePath))
-            {
-                throw new DirectoryNotFoundException($"The home directory '{sanitizedHome}' does not exist.");
-            }
-            return homePath;
+            // Use environment variable or fallback
+            var envHome = Environment.GetEnvironmentVariable("FILE_EXPLORER_HOME") ?? "Default";
+            _homeDir = Path.Combine(webHostEnvironment.ContentRootPath, "App_Data", envHome);
+
+            if (!Directory.Exists(_homeDir))
+                Directory.CreateDirectory(_homeDir);
         }
-        public IEnumerable<FileModel> GetFiles(string home, string relativePath)
+
+        public IEnumerable<FileModel> GetFiles(string relativePath)
         {
-            var homeFolder = GetHomeFolderPath(home);
+            var homeFolder = _homeDir;
             var targetPath = Path.Combine(homeFolder, relativePath ?? string.Empty);
             var results = new List<FileModel>();
 
@@ -48,7 +46,7 @@
                     Name = Path.GetFileName(dir),
                     Path = Path.GetRelativePath(homeFolder, dir).Replace("\\", "/"),
                     IsDirectory = true,
-                    Home = home,
+                    Home = homeFolder,
                     Size = folderSize,
                     FileCount = fileCount,
                     FolderCount = folderCount
@@ -64,7 +62,7 @@
                     Name = info.Name,
                     Path = Path.GetRelativePath(homeFolder, file).Replace("\\", "/"),
                     IsDirectory = false,
-                    Home = home,
+                    Home = homeFolder,
                     Size = info.Length
                 };
             }));
@@ -72,12 +70,12 @@
             return results;
         }
 
-        public Stream GetFileStream(string home, string relativePath)
+        public Stream GetFileStream( string relativePath)
         {
             if (string.IsNullOrEmpty(relativePath))
                 throw new ArgumentException("Path cannot be null or empty", nameof(relativePath));
 
-            var homeFolder = GetHomeFolderPath(home);
+            var homeFolder = _homeDir;
             var fullPath = Path.Combine(homeFolder, relativePath);
 
             if (!File.Exists(fullPath))
@@ -86,11 +84,11 @@
             return new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
 
-        public async Task SaveFile(string home, string relativePath, Stream content)
+        public async Task SaveFile(string relativePath, Stream content)
         {
             if (string.IsNullOrEmpty(relativePath))
                 throw new ArgumentException("Path cannot be null or empty", nameof(relativePath));
-            var homeFolder = GetHomeFolderPath(home);
+            var homeFolder = _homeDir;
             var targetPath = Path.Combine(homeFolder, relativePath ?? string.Empty);
             var dir = Path.GetDirectoryName(targetPath);
 
@@ -102,11 +100,11 @@
             await using var fs = new FileStream(targetPath, FileMode.Create, FileAccess.Write);
             await content.CopyToAsync(fs);
         }
-        public void DeleteFile(string home, string relativePath)
+        public void DeleteFile( string relativePath)
         {
             if (string.IsNullOrEmpty(relativePath))
                 throw new ArgumentException("Path cannot be null or empty", nameof(relativePath));
-            var homeFolder = GetHomeFolderPath(home);
+            var homeFolder = _homeDir;
             var targetPath = Path.Combine(homeFolder, relativePath ?? string.Empty);
             if (File.Exists(targetPath))
             {
@@ -122,9 +120,9 @@
             }
 
         }
-        public void CopyFile(string home, string sourcePath, string destinationPath)
+        public void CopyFile(string sourcePath, string destinationPath)
         {
-            var homeFolder = GetHomeFolderPath(home);
+            var homeFolder = _homeDir;
             var fullSourcePath = Path.Combine(homeFolder, sourcePath);
             var fullDestinationPath = Path.Combine(homeFolder, destinationPath);
 
@@ -146,9 +144,9 @@
             }
         }
 
-        public void MoveFile(string home, string sourcePath, string destinationPath)
+        public void MoveFile( string sourcePath, string destinationPath)
         {
-            var homeFolder = GetHomeFolderPath(home);
+            var homeFolder = _homeDir;
             var fullSourcePath = Path.Combine(homeFolder, sourcePath);
             var fullDestinationPath = Path.Combine(homeFolder, destinationPath);
 
@@ -196,12 +194,12 @@
         }
 
 
-        public IEnumerable<FileModel> SearchFiles(string home, string query)
+        public IEnumerable<FileModel> SearchFiles(string query)
         {
             if (string.IsNullOrEmpty(query))
                 return Enumerable.Empty<FileModel>();
 
-            var homeFolder = GetHomeFolderPath(home);
+            var homeFolder = _homeDir;
 
             if (!Directory.Exists(homeFolder))
                 return Enumerable.Empty<FileModel>();
@@ -218,7 +216,7 @@
                         Name = Path.GetFileName(dir),
                         Path = Path.GetRelativePath(homeFolder, dir).Replace("\\", "/"),
                         IsDirectory = true,
-                        Home = home
+                        Home = homeFolder
                     });
                 }
             }
@@ -234,7 +232,7 @@
                         Name = info.Name,
                         Path = Path.GetRelativePath(homeFolder, file).Replace("\\", "/"),
                         IsDirectory = false,
-                        Home = home,
+                        Home = homeFolder,
                         Size = info.Length
                     });
                 }
