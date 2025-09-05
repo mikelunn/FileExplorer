@@ -30,9 +30,9 @@
                     <button data-action="move">⇨</button>
                     <button type="button" data-action="delete" class="delete-btn" data-index="${idx}" aria-label="Delete file">&times;</button>
                     ${!item.isDirectory ?
-
-                        `   <button type="button" data-action="download" class="download-btn" aria-label="Download file">⬇</button>
-                    ` : ''}
+                         `<button type="button" data-action="download" class="download-btn" aria-label="Download file">⬇</button>
+                    ` : ''
+                }
                 </li>
             `
             }).join('');
