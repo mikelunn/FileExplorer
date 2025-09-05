@@ -14,12 +14,12 @@ namespace FileExplorer.Files
         public void MapEndpoints(WebApplication app)
         {
 
-            app.MapGet(_routePrefix, (string? path) =>
+            app.MapGet(_routePrefix, (string? path, string? query) =>
             {
                 try
                 {
                     var normalizedPath = path?.TrimStart('/') ?? "";
-                    var files = fileService.GetFiles(normalizedPath);
+                    var files = fileService.GetFiles(normalizedPath, query);
                     return Results.Ok(files);
 
                 }
@@ -152,11 +152,6 @@ namespace FileExplorer.Files
                     return Results.Problem("An internal server error occurred");
                 }
 
-            });
-            app.MapGet($"{_routePrefix}/search", (string query) =>
-            {
-                var files = fileService.SearchFiles(query);
-                return Results.Ok(files);
             });
 
         }

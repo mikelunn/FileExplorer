@@ -122,8 +122,11 @@ class ExplorerApp {
         }
     }
 
-    async loadFiles(path) {
-        const queryParams = path ? { path } : {};
+    async loadFiles(path, query = null) {
+        const queryParams = {
+            ...(path ? { path } : {}),
+            ...(query ? { query } : {})
+        }
         return await this.httpService.request('', { queryParams });
     }
     async searchFiles(query) {
@@ -133,9 +136,8 @@ class ExplorerApp {
         }
 
         try {
-            const results = await this.httpService.request('search', {
-                queryParams: { query }
-            });
+            const { path } = this.getParams();
+            const results = await this.loadFiles(path, query);
             this.fileList.setFiles(results);
         } catch (err) {
             console.error(err);

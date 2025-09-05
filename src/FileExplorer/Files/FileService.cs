@@ -2,13 +2,12 @@
 {
     public interface IFileService
     {
-        IEnumerable<FileModel> GetFiles( string relativePath);
+        IEnumerable<FileModel> GetFiles( string relativePath, string? query);
         Stream GetFileStream(string relativePath);
         Task SaveFile( string relativePath, Stream fileStream);
         void DeleteFile( string relativePath);
         void CopyFile(string sourcePath, string destinationPath);
         void MoveFile( string sourcePath, string destinationPath);
-        IEnumerable<FileModel> SearchFiles(string query);
     }
     public class FileService : IFileService
     {
@@ -24,49 +23,98 @@
                 Directory.CreateDirectory(_homeDir);
         }
 
-        public IEnumerable<FileModel> GetFiles(string relativePath)
+        public IEnumerable<FileModel> GetFiles(string? relativePath, string? query = null)
         {
             var homeFolder = _homeDir;
             var targetPath = Path.Combine(homeFolder, relativePath ?? string.Empty);
-            var results = new List<FileModel>();
 
             if (!Directory.Exists(targetPath))
-                return results;
+                return Enumerable.Empty<FileModel>();
 
-            // Directories
-            results.AddRange(Directory.GetDirectories(targetPath).Select(dir =>
+            var results = new List<FileModel>();
+
+            if (!string.IsNullOrEmpty(query))
             {
-                var allFiles = Directory.GetFiles(dir, "*", SearchOption.AllDirectories);
-                var folderSize = allFiles.Sum(f => new FileInfo(f).Length);
-                var folderCount = Directory.GetDirectories(dir, "*", SearchOption.AllDirectories).Length;
-                var fileCount = allFiles.Length;
-
-                return new FileModel
+                // Search directories
+                foreach (var dir in Directory.GetDirectories(targetPath, "*", SearchOption.AllDirectories))
                 {
-                    Name = Path.GetFileName(dir),
-                    Path = Path.GetRelativePath(homeFolder, dir).Replace("\\", "/"),
-                    IsDirectory = true,
-                    Size = folderSize,
-                    FileCount = fileCount,
-                    FolderCount = folderCount
-                };
-            }));
+                    if (Path.GetFileName(dir).Contains(query, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var allFiles = Directory.GetFiles(dir, "*", SearchOption.AllDirectories);
+                        var folderSize = allFiles.Sum(f => new FileInfo(f).Length);
+                        var folderCount = Directory.GetDirectories(dir, "*", SearchOption.AllDirectories).Length;
+                        var fileCount = allFiles.Length;
 
-            // Files
-            results.AddRange(Directory.GetFiles(targetPath).Where(f => Path.GetFileName(f) != ".gitkeep").Select(file =>
+                        results.Add(new FileModel
+                        {
+                            Name = Path.GetFileName(dir),
+                            Path = Path.GetRelativePath(homeFolder, dir).Replace("\\", "/"),
+                            IsDirectory = true,
+                            Size = folderSize,
+                            FileCount = fileCount,
+                            FolderCount = folderCount
+                        });
+                    }
+                }
+
+                // Search files
+                foreach (var file in Directory.GetFiles(targetPath, "*", SearchOption.AllDirectories))
+                {
+                    if (Path.GetFileName(file).Contains(query, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var info = new FileInfo(file);
+                        results.Add(new FileModel
+                        {
+                            Name = info.Name,
+                            Path = Path.GetRelativePath(homeFolder, file).Replace("\\", "/"),
+                            IsDirectory = false,
+                            Size = info.Length
+                        });
+                    }
+                }
+            }
+            else
             {
-                var info = new FileInfo(file);
-                return new FileModel
+                // Directories
+                results.AddRange(Directory.GetDirectories(targetPath).Select(dir =>
                 {
-                    Name = info.Name,
-                    Path = Path.GetRelativePath(homeFolder, file).Replace("\\", "/"),
-                    IsDirectory = false,
-                    Size = info.Length
-                };
-            }));
+                    var allFiles = Directory.GetFiles(dir, "*", SearchOption.AllDirectories);
+                    var folderSize = allFiles.Sum(f => new FileInfo(f).Length);
+                    var folderCount = Directory.GetDirectories(dir, "*", SearchOption.AllDirectories).Length;
+                    var fileCount = allFiles.Length;
+
+                    return new FileModel
+                    {
+                        Name = Path.GetFileName(dir),
+                        Path = Path.GetRelativePath(homeFolder, dir).Replace("\\", "/"),
+                        IsDirectory = true,
+                        Size = folderSize,
+                        FileCount = fileCount,
+                        FolderCount = folderCount
+                    };
+                }));
+
+                // Files
+                results.AddRange(
+                    Directory.GetFiles(targetPath)
+                        .Where(f => Path.GetFileName(f) != ".gitkeep")
+                        .Select(file =>
+                        {
+                            var info = new FileInfo(file);
+                            return new FileModel
+                            {
+                                Name = info.Name,
+                                Path = Path.GetRelativePath(homeFolder, file).Replace("\\", "/"),
+                                IsDirectory = false,
+                                Size = info.Length
+                            };
+                        })
+                );
+            }
 
             return results;
         }
+
 
         public Stream GetFileStream( string relativePath)
         {
@@ -189,52 +237,6 @@
                 string destSubDir = Path.Combine(destinationDir, subDir.Name);
                 CopyDirectory(subDir.FullName, destSubDir);
             }
-        }
-
-
-        public IEnumerable<FileModel> SearchFiles(string query)
-        {
-            if (string.IsNullOrEmpty(query))
-                return Enumerable.Empty<FileModel>();
-
-            var homeFolder = _homeDir;
-
-            if (!Directory.Exists(homeFolder))
-                return Enumerable.Empty<FileModel>();
-
-            var results = new List<FileModel>();
-
-            // Recursively search directories
-            foreach (var dir in Directory.GetDirectories(homeFolder, "*", SearchOption.AllDirectories))
-            {
-                if (Path.GetFileName(dir).Contains(query, StringComparison.OrdinalIgnoreCase))
-                {
-                    results.Add(new FileModel
-                    {
-                        Name = Path.GetFileName(dir),
-                        Path = Path.GetRelativePath(homeFolder, dir).Replace("\\", "/"),
-                        IsDirectory = true
-                    });
-                }
-            }
-
-            // Recursively search files
-            foreach (var file in Directory.GetFiles(homeFolder, "*", SearchOption.AllDirectories))
-            {
-                if (Path.GetFileName(file).Contains(query, StringComparison.OrdinalIgnoreCase))
-                {
-                    var info = new FileInfo(file);
-                    results.Add(new FileModel
-                    {
-                        Name = info.Name,
-                        Path = Path.GetRelativePath(homeFolder, file).Replace("\\", "/"),
-                        IsDirectory = false,
-                        Size = info.Length
-                    });
-                }
-            }
-
-            return results;
         }
 
 
