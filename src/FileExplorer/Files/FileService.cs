@@ -97,7 +97,6 @@
                 // Files
                 results.AddRange(
                     Directory.GetFiles(targetPath)
-                        .Where(f => Path.GetFileName(f) != ".gitkeep")
                         .Select(file =>
                         {
                             var info = new FileInfo(file);

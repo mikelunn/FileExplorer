@@ -429,6 +429,4 @@ FodyWeavers.xsd
 
 
 # Ignore everything inside the nested Default folder
-/src/FileExplorer/App_Data/Default/**
-# Keep the placeholder
-!/src/FileExplorer/App_Data/Default/.gitkeep
+/src/FileExplorer/App_Data/**
