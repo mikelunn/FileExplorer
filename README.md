@@ -1,6 +1,5 @@
-# Project Name
-
-A brief description of your project. Explain what it does and why it exists.
+# File Explorer
+A file/folder browsing POC.
 
 ---
 
