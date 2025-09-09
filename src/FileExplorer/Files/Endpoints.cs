@@ -2,18 +2,11 @@
 
 namespace FileExplorer.Files
 {
-    public class Endpoints
+    public static class FileEndpoints
     {
-        private readonly IFileService fileService;
-        private readonly string _routePrefix = "api/v1/files";
-
-        public Endpoints(IFileService fileService)
+        public static void MapFileEndpoints(this WebApplication app, string _routePrefix = "api/v1/files")
         {
-            this.fileService = fileService;
-        }
-        public void MapEndpoints(WebApplication app)
-        {
-
+            var fileService = app.Services.GetRequiredService<IFileService>();
             app.MapGet(_routePrefix, (string? path, string? query) =>
             {
                 try
@@ -81,7 +74,7 @@ namespace FileExplorer.Files
 
             app.MapPost(_routePrefix, async (HttpRequest request) =>
             {
-                
+
                 if (!request.HasFormContentType)
                     return Results.BadRequest("Expected multipart/form-data");
 
@@ -138,7 +131,7 @@ namespace FileExplorer.Files
                     fileService.DeleteFile(normalizedPath);
                     return Results.NoContent();
                 }
-                catch(FileNotFoundException ex)
+                catch (FileNotFoundException ex)
                 {
                     return Results.NotFound(new { message = ex.Message });
                 }
@@ -153,7 +146,6 @@ namespace FileExplorer.Files
                 }
 
             });
-
         }
     }
 }

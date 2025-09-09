@@ -5,10 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddSingleton<IFileService, FileService>();
-builder.Services.AddSingleton<Endpoints>();
-
-
+builder.Services.AddTransient<IFileService, FileService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,9 +15,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapFileEndpoints();
 
-var filesEndpoints = app.Services.GetRequiredService<Endpoints>();
-filesEndpoints.MapEndpoints(app);
+
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
